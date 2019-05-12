@@ -3,7 +3,7 @@ from copy import deepcopy
 
 class Node:
 
-    # visited = {}
+    visited = {}
 
     def __init__(self, state=None, parent=None, cost=0, depth=0, children=[]):
         self.state = state
@@ -11,6 +11,7 @@ class Node:
         self.cost = cost
         self.depth = depth
         self.children = children
+        self.fn = 0
 
     def is_goal(self, goal_state):
         for i in range(len(self.state)):
@@ -36,39 +37,39 @@ class Node:
             def add_swap(i, j):
                 new_state = deepcopy(state)
                 new_state[i][j], new_state[zero_i][zero_j] = new_state[zero_i][zero_j], new_state[i][j]
-                states.append(new_state)
-                # hashable_state = tuple(tuple(row) for row in new_state)
-                # if hashable_state not in Node.visited:
-                #     Node.visited[hashable_state] = 0
-                #     states.append(new_state)
-                #     print("466")
-                # else:
-                #     print("233")
+                if True:
+                    hashable_state = tuple(tuple(row) for row in new_state)
+                    if hashable_state not in Node.visited:
+                        Node.visited[hashable_state] = 0
+                        states.append(new_state)
+                else:
+                    states.append(new_state)
 
             if zero_i != 0:
                 add_swap(zero_i - 1, zero_j)
 
-            if zero_j != 0:
-                add_swap(zero_i, zero_j - 1)
+            if zero_j != len(state) - 1:
+                add_swap(zero_i, zero_j + 1)
 
             if zero_i != len(state) - 1:
                 add_swap(zero_i + 1, zero_j)
 
-            if zero_j != len(state) - 1:
-                add_swap(zero_i, zero_j + 1)
+            if zero_j != 0:
+                add_swap(zero_i, zero_j - 1)
 
             mid = int(len(state) / 2)
+            end = len(state) - 1
 
             if zero_i == 0 and zero_j == mid:
-                add_swap(len(state) - 1, mid)
+                add_swap(end, mid)
 
-            if zero_i == len(state) - 1 and zero_j == mid:
+            if zero_i == end and zero_j == mid:
                 add_swap(0, mid)
 
             if zero_i == mid and zero_j == 0:
-                add_swap(mid, len(state) - 1)
+                add_swap(mid, end)
 
-            if zero_i == mid and zero_j == len(state) - 1:
+            if zero_i == mid and zero_j == end:
                 add_swap(mid, 0)
 
             return states

@@ -6,24 +6,17 @@ from node import Node
 
 class Search:
     count = 0
-    goal_state = [[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15],\
-                  [16, 17, 18, 19, 20], [21, 22, 23, 24, 0]]
+    # goal_state = [[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15], \
+    #               [16, 17, 18, 19, 20], [21, 22, 23, 24, 0]]
     tiles_places = []
-    for i in range(len(goal_state)):
-        for j in range(len(goal_state)):
-            tiles_places.append((goal_state[i][j], (i, j)))
-            # heapq.heappush(tiles_places, (goal_state[i][j], (i, j)))
-    tiles_places = sorted(tiles_places, key=lambda x: x[0])
-    # print(tiles_places)
 
-    def get_state():
-        state: List[List[int]] = []
-        # n = int(input())
-        n = 5
-        for i in range(n):
-            row = [int(x) for x in input().split('\t')]
-            state.append(row)
-        return state
+    def config(goal_state):
+        Search.goal_state = goal_state
+        for i in range(len(goal_state)):
+            for j in range(len(goal_state)):
+                Search.tiles_places.append((goal_state[i][j], (i, j)))
+                # heapq.heappush(tiles_places, (goal_state[i][j], (i, j)))
+        Search.tiles_places = sorted(Search.tiles_places, key=lambda x: x[0])
 
     def a_star_search(state, goal_state, fn):
         queue = []
@@ -31,8 +24,8 @@ class Search:
         node = Node(state)
         while not node.is_goal(goal_state):
             Search.count += 1
-            if Search.count % 10000 == 0:
-                print(Search.count)
+            # if Search.count % 10000 == 0:
+            #     print(Search.count)
             node.expand()
             for child in node.children:
                 queue_item = (fn(child), entrance, child)
@@ -53,13 +46,20 @@ class Search:
 
         def dls(node):
             Search.count += 1
-            if Search.count % 10000 == 0:
+            if Search.count % 1 == 0:
                 print(Search.count)
+                print("gn:%d" % node.gn())
+                print("fn:%d" % node.fn)
+                # print(Node.visited)
             if node.is_goal(goal_state):
                 return node
-            # if node.depth + fn(node) < depth:
-            if node.depth + fn(node) < depth:
+            # print("-----")
+            # print("fn:%d" % fn(node))
+            if fn(node) < depth:
                 node.expand()
+                for child in node.children:
+                    child.fn = fn(child)
+                node.children = sorted(node.children, key=lambda sort_child: sort_child.fn)
                 for child in node.children:
                     result = dls(child)
                     if result:
@@ -70,6 +70,8 @@ class Search:
         while not answer:
             answer = dls(Node(state))
             depth += 1
+            Node.visited = {}
+            # print(depth)
 
         output = [answer.state]
         for parent in answer.parents():
@@ -93,41 +95,37 @@ class Search:
         manhattan_distance = 0
 
         mid = int(len(node.state) / 2)
-        # print("mid:%d" % mid)
         end = len(node.state) - 1
-        # print("end:%d" % end)
-
-        # print(node.state)
 
         for i in range(len(node.state)):
             for j in range(len(node.state)):
+                if node.state[i][j] == 0:
+                    continue
                 tile_i, tile_j = Search.tiles_places[node.state[i][j]][1]
-                # print("--------")
-                # print("(%d, %d)" % (tile_i, tile_j))
-                # print("(%d, %d)" % (i, j))
+                # print("------")
+                # print("%d, %d" % (tile_i, tile_j))
+                # print("%d, %d" % (i, j))
                 if i != tile_i or j != tile_j:
                     naive_distance = abs(tile_i - i) + abs(tile_j - j)
 
                     left_distance = abs(tile_i - 0) + abs(tile_j - mid) + \
-                        abs(i - end) + abs(j - mid) + 1
+                                    abs(i - end) + abs(j - mid) + 1
 
                     right_distance = abs(tile_i - end) + abs(tile_j - mid) + \
-                        abs(i - 0) + abs(j - mid) + 1
+                                     abs(i - 0) + abs(j - mid) + 1
 
                     up_distance = abs(tile_i - mid) + abs(tile_j - 0) + \
-                        abs(i - mid) + abs(j - end)
+                                  abs(i - mid) + abs(j - end) + 1
 
                     down_distance = abs(tile_i - mid) + abs(tile_j - end) + \
-                        abs(i - mid) + abs(j - 0)
+                                    abs(i - mid) + abs(j - 0) + 1
 
-                    distances = [naive_distance, left_distance, right_distance,\
+                    distances = [naive_distance, left_distance, right_distance, \
                                  up_distance, down_distance]
-
-                    # print(distances)
 
                     manhattan_distance += min(distances)
 
-        # print("md:%d" % manhattan_distance)
+        # print(manhattan_distance)
+        # print(node.gn())
         # exit(0)
-
-        return node.gn() + manhattan_distance
+        return node.gn() + 1 * manhattan_distance
