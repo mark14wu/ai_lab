@@ -104,3 +104,10 @@ venv.bak/
 .mypy_cache/
 .DS_Store
 .gitignore
+lab01/24数码/Ah2_solution.txt
+lab01/24数码/Ah1_solution.txt
+lab01/24数码/IDAh1_solution.txt
+lab01/24数码/IDAh2_solution.txt
+lab01/24数码/input.txt
+lab01/24数码/.vscode/ipch/58af659946a3d3/Cannon.ipch
+lab01/24数码/.vscode/ipch/58af659946a3d3/mmap_address.bin

@@ -6,11 +6,11 @@ from node import Node
 
 class Search:
     count = 0
-    # goal_state = [[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15], \
-    #               [16, 17, 18, 19, 20], [21, 22, 23, 24, 0]]
+    # goal_state = [[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15], [16, 17, 18, 19, 20], [21, 22, 23, 24, 0]]
     tiles_places = []
 
-    def config(goal_state):
+    def config(input_state, goal_state):
+        Search.input_state = input_state
         Search.goal_state = goal_state
         for i in range(len(goal_state)):
             for j in range(len(goal_state)):
@@ -18,13 +18,16 @@ class Search:
                 # heapq.heappush(tiles_places, (goal_state[i][j], (i, j)))
         Search.tiles_places = sorted(Search.tiles_places, key=lambda x: x[0])
 
-    def a_star_search(state, goal_state, fn):
+    def a_star_search(fn):
+
+        Search.count = 0
+
         queue = []
         entrance = 0
-        node = Node(state)
-        while not node.is_goal(goal_state):
+        node = Node(Search.input_state)
+        while not node.is_goal(Search.goal_state):
             Search.count += 1
-            # if Search.count % 10000 == 0:
+            # if Search.count % 1 == 0:
             #     print(Search.count)
             node.expand()
             for child in node.children:
@@ -40,18 +43,20 @@ class Search:
 
         return output
 
-    def id_a_star_search(state, goal_state, fn):
+    def id_a_star_search(fn):
+
+        Search.count = 0
 
         depth = 0
 
         def dls(node):
             Search.count += 1
-            if Search.count % 1 == 0:
-                print(Search.count)
-                print("gn:%d" % node.gn())
-                print("fn:%d" % node.fn)
+            # if Search.count % 1 == 0:
+                # print(Search.count)
+                # print("gn:%d" % node.gn())
+                # print("fn:%d" % node.fn)
                 # print(Node.visited)
-            if node.is_goal(goal_state):
+            if node.is_goal(Search.goal_state):
                 return node
             # print("-----")
             # print("fn:%d" % fn(node))
@@ -68,7 +73,7 @@ class Search:
 
         answer = None
         while not answer:
-            answer = dls(Node(state))
+            answer = dls(Node(Search.input_state))
             depth += 1
             Node.visited = {}
             # print(depth)
@@ -86,7 +91,7 @@ class Search:
             for j in range(len(node.state)):
                 if node.state[i][j] == 0:
                     continue
-                tile_i, tile_j = tiles_places[node.state[i][j]][1]
+                tile_i, tile_j = Search.tiles_places[node.state[i][j]][1]
                 if i != tile_i or j != tile_j:
                     misplace_count += 1
         return node.gn() + misplace_count
@@ -128,4 +133,4 @@ class Search:
         # print(manhattan_distance)
         # print(node.gn())
         # exit(0)
-        return node.gn() + 1 * manhattan_distance
+        return node.gn() + manhattan_distance
