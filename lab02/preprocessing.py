@@ -1,3 +1,6 @@
+import os
+import pickle
+
 import numpy as np
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.model_selection import KFold
@@ -54,9 +57,30 @@ def dimenReduceWithLDA(feature_path, label_path):
     return X_train, y_train, X_test, y_test, label_encoder
 
 
-def getDataDEAP() -> object:
-    return dimenReduceWithLDA("data/DEAP/EEG_feature.txt", "data/DEAP/valence_arousal_label.txt")
+def getDataDEAP():
+    return pickle.load(open("data/preprocessed/svm_deap", 'rb'))
 
 
 def getDataMAHNOB_HCI():
-    return dimenReduceWithLDA("data/MAHNOB-HCI/EEG_feature.txt", "data/MAHNOB-HCI/valence_arousal_label.txt")
+    return pickle.load(open("data/preprocessed/svm_mahnob_hci", 'rb'))
+
+
+def process():
+    # mkdir
+    if not os.path.exists("data/preprocessed"):
+        os.mkdir("data/preprocessed")
+
+    # save DEAP data for svm
+    if not os.path.exists("data/preprocessed/svm_deap"):
+        X_train, y_train, X_test, y_test, label_encoder = \
+            dimenReduceWithLDA("data/DEAP/EEG_feature.txt", "data/DEAP/valence_arousal_label.txt")
+        pickle.dump((X_train, y_train, X_test, y_test, label_encoder), open("data/preprocessed/svm_deap", 'wb'))
+
+    # save MAHNOB data for svm
+    if not os.path.exists("data/preprocessed/svm_mahnob_hci"):
+        X_train, y_train, X_test, y_test, label_encoder = \
+            dimenReduceWithLDA("data/MAHNOB-HCI/EEG_feature.txt", "data/MAHNOB-HCI/valence_arousal_label.txt")
+        pickle.dump((X_train, y_train, X_test, y_test, label_encoder), open("data/preprocessed/svm_mahnob_hci", 'wb'))
+
+
+process()
