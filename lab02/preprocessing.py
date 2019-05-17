@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+from sklearn.model_selection import KFold
 from sklearn.preprocessing import LabelEncoder
 
 
@@ -45,12 +46,17 @@ def dimenReduceWithLDA(feature_path, label_path):
     # concatenate 5 different frequency bands into a 5 x 3 = 15 dim feature vector
     samples = np.concatenate(samples, axis=1)
 
-    return samples, labels, label_encoder
+    # generate 5 folds cross validation
+    train, test = next(KFold(n_splits=5, shuffle=True).split(samples))
+    X_train, X_test = samples[train], samples[test]
+    y_train, y_test = labels[train], labels[test]
+
+    return X_train, y_train, X_test, y_test, label_encoder
 
 
-def DEAP():
-    dimenReduceWithLDA("data/DEAP/EEG_feature.txt", "data/DEAP/valence_arousal_label.txt")
+def getDataDEAP() -> object:
+    return dimenReduceWithLDA("data/DEAP/EEG_feature.txt", "data/DEAP/valence_arousal_label.txt")
 
 
-def MAHNOB_HCI():
-    dimenReduceWithLDA("data/MAHNOB-HCI/EEG_feature.txt", "data/MAHNOB-HCI/valence_arousal_label.txt")
+def getDataMAHNOB_HCI():
+    return dimenReduceWithLDA("data/MAHNOB-HCI/EEG_feature.txt", "data/MAHNOB-HCI/valence_arousal_label.txt")
