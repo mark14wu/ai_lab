@@ -7,6 +7,17 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import LabelEncoder
 
 
+def NB_raw_sample(feature_path, label_path):
+    with open(feature_path) as feature_file:
+        samples = [sample_line.split('\t') for sample_line in feature_file.readlines()]
+        samples = np.array(samples, dtype=float)
+
+    with open(label_path) as label_file:
+        labels = [int(raw_label) for raw_label in label_file.readlines()]
+
+    labels = np.array(labels)
+    return samples, labels
+
 def dimReduceWithLDA(feature_path, label_path):
     # read features from file
     with open(feature_path) as feature_file:
@@ -55,10 +66,33 @@ def dimReduceWithLDA(feature_path, label_path):
 def getDataDEAP():
     return pickle.load(open("data/preprocessed/svm_deap", 'rb'))
 
-
 def getDataMAHNOB_HCI():
     return pickle.load(open("data/preprocessed/svm_mahnob_hci", 'rb'))
 
+
+def getNBDataDEAP():
+    id_file = "data/DEAP/subject_video.txt"
+    id_list = np.array([int(line.split('\t')[0]) for line in open(id_file).readlines()])
+    return pickle.load(open("data/preprocessed/bernoulliNB_deap_hci", 'rb')), id_list
+
+
+def getNBDataMAHNOB_HCI():
+    id_file = "data/MAHNOB-HCI/subject_video.txt"
+    id_list = np.array([int(line.split('\t')[0]) for line in open(id_file).readlines()])
+    return pickle.load(open("data/preprocessed/bernoulliNB_mahnob_hci", 'rb')), id_list
+
+
+def save_data(id_file: str, dest_file: str, samples, labels) -> None:
+    if not os.path.exists(dest_file):
+        # skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=114514)
+        skf = StratifiedKFold(n_splits=5, shuffle=True)
+        # read patient id
+        id_list = [int(line.split('\t')[0]) for line in open(id_file).readlines()]
+        id_list = np.array(id_list)
+        # generate cross validation indices
+        indices = [(train, test) for train, test in skf.split(samples, id_list)]
+        # save to file
+        pickle.dump((samples, labels, indices), open(dest_file, 'wb'))
 
 def process():
     # mkdir
@@ -66,43 +100,26 @@ def process():
         os.mkdir("data/preprocessed")
 
     # save DEAP data for svm
-    if not os.path.exists("data/preprocessed/svm_deap"):
-        # X_train, y_train, X_test, y_test, label_encoder = \
-        skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=114514)
-
-        # read patient id
-        id_list = [int(line.split('\t')[0]) for line in open("data/DEAP/subject_video.txt").readlines()]
-        id_list = np.array(id_list)
-
-        # get dim reduced data
-        samples, labels = \
-            dimReduceWithLDA("data/DEAP/EEG_feature.txt", "data/DEAP/valence_arousal_label.txt")
-
-        # generate cross validation indices
-        indices = [(train, test) \
-                   for train, test in skf.split(samples, id_list)]
-
-        # save everything to file
-        pickle.dump((samples, labels, indices), open("data/preprocessed/svm_deap", 'wb'))
+    samples, labels = dimReduceWithLDA("data/DEAP/EEG_feature.txt", "data/DEAP/valence_arousal_label.txt")
+    save_data("data/DEAP/subject_video.txt", "data/preprocessed/svm_deap",
+              samples, labels)
 
     # save MAHNOB data for svm
-    if not os.path.exists("data/preprocessed/svm_mahnob_hci"):
-        # generate 5 folds
-        skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=114514)
+    samples, labels = dimReduceWithLDA("data/MAHNOB-HCI/EEG_feature.txt", "data/MAHNOB-HCI/valence_arousal_label.txt")
+    save_data("data/MAHNOB-HCI/subject_video.txt", "data/preprocessed/svm_mahnob_hci",
+              samples, labels)
 
-        # read patient id
-        id_list = [int(line.split('\t')[0]) for line in open("data/MAHNOB-HCI/subject_video.txt").readlines()]
-        id_list = np.array(id_list)
+    # save DEAP data for Naive Bayes
+    samples, labels = NB_raw_sample("data/DEAP/EEG_feature.txt", "data/MAHNOB-HCI/EEG_emotion_category.txt")
+    # samples, labels = dimReduceWithLDA("data/DEAP/EEG_feature.txt", "data/MAHNOB-HCI/EEG_emotion_category.txt")
+    save_data("data/DEAP/subject_video.txt", "data/preprocessed/bernoulliNB_deap_hci",
+              samples, labels)
 
-        # get dim reduced data
-        samples, labels = \
-            dimReduceWithLDA("data/MAHNOB-HCI/EEG_feature.txt", "data/MAHNOB-HCI/valence_arousal_label.txt")
+    # save MAHNOB data for Naive Bayes
+    samples, labels = NB_raw_sample("data/MAHNOB-HCI/EEG_feature.txt", "data/MAHNOB-HCI/EEG_emotion_category.txt")
+    # samples, labels = dimReduceWithLDA("data/MAHNOB-HCI/EEG_feature.txt", "data/MAHNOB-HCI/EEG_emotion_category.txt")
+    save_data("data/MAHNOB-HCI/subject_video.txt", "data/preprocessed/bernoulliNB_mahnob_hci",
+              samples, labels)
 
-        # generate cross validation indices
-        indices = [(train, test) \
-                   for train, test in skf.split(samples, id_list)]
-
-        # save to file
-        pickle.dump((samples, labels, indices), open("data/preprocessed/svm_mahnob_hci", 'wb'))
 
 process()
