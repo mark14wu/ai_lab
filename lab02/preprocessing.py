@@ -82,6 +82,10 @@ def getNBDataMAHNOB_HCI():
     return pickle.load(open("data/preprocessed/bernoulliNB_mahnob_hci", 'rb')), id_list
 
 
+def getEmotionDataMAHNOB_HCI():
+    return pickle.load(open("data/preprocessed/bernoulliNB_mahnob_hci", 'rb'))
+
+
 def save_data(id_file: str, dest_file: str, samples, labels) -> None:
     if not os.path.exists(dest_file):
         # skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=114514)
