@@ -1,37 +1,42 @@
 import warnings
 
+warnings.filterwarnings("ignore")
+
 import numpy as np
 from numpy.core.multiarray import ndarray
 from sklearn.svm import SVC
 from tqdm import tqdm
+from sklearn.model_selection import cross_val_score
 
 from preprocessing import getDataDEAP, getDataMAHNOB_HCI
 
-warnings.filterwarnings("ignore")
 
 
 def svm_tuning(C_start, C_end, step):
+    """
+    tune a best C for certain dataset
+    """
     def train_model():
         score_list = {}
         for current_C in tqdm(C_list[1:]):
             rbf_svc = SVC(C=current_C, kernel='rbf')
-            current_scores = []
-            for train, test in indices:
-                rbf_svc.fit(samples[train], labels[train])
-                current_scores.append(float(rbf_svc.score(samples[test], labels[test])))
-            current_score = sum(current_scores) / len(current_scores)
+            current_score = cross_val_score(rbf_svc, samples, labels, cv=indices)
             score_list[current_C] = current_score
         return score_list
 
     C_list: ndarray = np.arange(C_start, C_end, step)
 
+    # training on DEAP
     samples, labels, indices = getDataDEAP()
     print("Working on DEAP dataset")
     deap_result = train_model()
+
+    # training on MAHNOB
     samples, labels, indices = getDataMAHNOB_HCI()
     print("Working on MAHNOB-HCI dataset")
     mahnob_result = train_model()
 
+    # calculating best C and best score
     max_C = 0
     max_score = 0
     for C in C_list[1:]:
@@ -47,15 +52,13 @@ def svm_test(C, getData):
 
     :rtype: None
     """
-    # test on DEAP
-    # X_train, y_train, X_test, y_test, label_encoder = getDataDEAP()
+    # read data
     samples, labels, indices = getData()
-    scores = []
+    # build model
     svc = SVC(C=C, kernel='rbf')
-    for train, test in indices:
-        svc.fit(samples[train], labels[train])
-        scores.append(float(svc.score(samples[test], labels[test])))
-    print("score: %f" % (sum(scores) / len(scores)))
+    # get cross validation score
+    scores = cross_val_score(svc, samples, labels, cv=indices)
+    print("score:", scores.mean())
 
 
 # svm_tuning(0, 50, 0.01)
