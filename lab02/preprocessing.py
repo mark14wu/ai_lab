@@ -3,7 +3,6 @@ import pickle
 
 import numpy as np
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
-# from sklearn.model_selection import KFold
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import LabelEncoder
 
@@ -67,8 +66,7 @@ def process():
         os.mkdir("data/preprocessed")
 
     # save DEAP data for svm
-    # if not os.path.exists("data/preprocessed/svm_deap"):
-    if True:
+    if not os.path.exists("data/preprocessed/svm_deap"):
         # X_train, y_train, X_test, y_test, label_encoder = \
         skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=114514)
 
