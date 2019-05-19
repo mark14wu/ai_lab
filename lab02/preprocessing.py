@@ -3,11 +3,12 @@ import pickle
 
 import numpy as np
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
-from sklearn.model_selection import KFold
+# from sklearn.model_selection import KFold
+from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import LabelEncoder
 
 
-def dimenReduceWithLDA(feature_path, label_path):
+def dimReduceWithLDA(feature_path, label_path):
     # read features from file
     with open(feature_path) as feature_file:
         samples = [sample_line.split('\t') for sample_line in feature_file.readlines()]
@@ -49,12 +50,7 @@ def dimenReduceWithLDA(feature_path, label_path):
     # concatenate 5 different frequency bands into a 5 x 3 = 15 dim feature vector
     samples = np.concatenate(samples, axis=1)
 
-    # generate 5 folds cross validation
-    train, test = next(KFold(n_splits=5, shuffle=True).split(samples))
-    X_train, X_test = samples[train], samples[test]
-    y_train, y_test = labels[train], labels[test]
-
-    return X_train, y_train, X_test, y_test, label_encoder
+    return samples, labels
 
 
 def getDataDEAP():
@@ -71,16 +67,44 @@ def process():
         os.mkdir("data/preprocessed")
 
     # save DEAP data for svm
-    if not os.path.exists("data/preprocessed/svm_deap"):
-        X_train, y_train, X_test, y_test, label_encoder = \
-            dimenReduceWithLDA("data/DEAP/EEG_feature.txt", "data/DEAP/valence_arousal_label.txt")
-        pickle.dump((X_train, y_train, X_test, y_test, label_encoder), open("data/preprocessed/svm_deap", 'wb'))
+    # if not os.path.exists("data/preprocessed/svm_deap"):
+    if True:
+        # X_train, y_train, X_test, y_test, label_encoder = \
+        skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=114514)
+
+        # read patient id
+        id_list = [int(line.split('\t')[0]) for line in open("data/DEAP/subject_video.txt").readlines()]
+        id_list = np.array(id_list)
+
+        # get dim reduced data
+        samples, labels = \
+            dimReduceWithLDA("data/DEAP/EEG_feature.txt", "data/DEAP/valence_arousal_label.txt")
+
+        # generate cross validation indices
+        indices = [(train, test) \
+                   for train, test in skf.split(samples, id_list)]
+
+        # save everything to file
+        pickle.dump((samples, labels, indices), open("data/preprocessed/svm_deap", 'wb'))
 
     # save MAHNOB data for svm
     if not os.path.exists("data/preprocessed/svm_mahnob_hci"):
-        X_train, y_train, X_test, y_test, label_encoder = \
-            dimenReduceWithLDA("data/MAHNOB-HCI/EEG_feature.txt", "data/MAHNOB-HCI/valence_arousal_label.txt")
-        pickle.dump((X_train, y_train, X_test, y_test, label_encoder), open("data/preprocessed/svm_mahnob_hci", 'wb'))
+        # generate 5 folds
+        skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=114514)
 
+        # read patient id
+        id_list = [int(line.split('\t')[0]) for line in open("data/MAHNOB-HCI/subject_video.txt").readlines()]
+        id_list = np.array(id_list)
+
+        # get dim reduced data
+        samples, labels = \
+            dimReduceWithLDA("data/MAHNOB-HCI/EEG_feature.txt", "data/MAHNOB-HCI/valence_arousal_label.txt")
+
+        # generate cross validation indices
+        indices = [(train, test) \
+                   for train, test in skf.split(samples, id_list)]
+
+        # save to file
+        pickle.dump((samples, labels, indices), open("data/preprocessed/svm_mahnob_hci", 'wb'))
 
 process()
