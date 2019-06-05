@@ -59,34 +59,26 @@ for train_index, test_index in group_kfold.split(X, Y, group):
     # ])
 
     model = Sequential([
-        Dense(128, input_dim=107),
+        Dense(256, input_dim=107),
         Activation('relu'),
-        Dense(64),
-        Activation('softmax'),
-        Dense(64),
-        Activation('softmax'),
-        Dense(48),
-        Activation('relu'),
-        Dense(48),
-        Activation('relu'),
-        Dense(32),
-        Activation('softmax'),
-        Dense(32),
-        Activation('softmax'),
-        Dense(32),
-        Activation('softmax'),
-        Dense(48),
-        Activation('relu'),
-        Dense(48),
-        Activation('relu'),
-        Dense(64),
-        Activation('softmax'),
-        Dense(64),
-        Activation('softmax'),
         Dense(128),
+        Activation('softmax'),
+        Dense(64),
+        Activation('softmax'),
+        Dense(64),
+        Activation('relu'),
+        Dense(48),
+        Activation('relu'),
+        Dense(48),
+        Activation('relu'),
+        Dense(32),
+        Activation('relu'),
+        Dense(32),
+        Activation('relu'),
+        Dense(16),
         Activation('relu'),
         Dense(1),
-        Activation('sigmoid'),
+        Activation('softmax'),
     ])
 
     nGPU = 8
@@ -94,7 +86,7 @@ for train_index, test_index in group_kfold.split(X, Y, group):
     # model = multi_gpu_model(model, gpus=nGPU)
     model.compile(
         loss='mean_squared_error',
-        optimizer='rmsprop',
+        optimizer='adam',
         metrics=['accuracy'])
 
     # model.compile(optimizer='adadelta',
