@@ -58,8 +58,35 @@ for train_index, test_index in group_kfold.split(X, Y, group):
         Activation('sigmoid'),
     ])
 
-    nGPU = 8
+    # model = Sequential([
+    #     Dense(128, input_dim=107),
+    #     Activation('relu'),
+    #     Dense(64),
+    #     Activation('softmax'),
+    #     Dense(64),
+    #     Activation('softmax'),
+    #     Dense(48),
+    #     Activation('relu'),
+    #     Dense(48),
+    #     Activation('relu'),
+    #     Dense(32),
+    #     Activation('softmax'),
+    #     Dense(48),
+    #     Activation('relu'),
+    #     Dense(48),
+    #     Activation('relu'),
+    #     Dense(64),
+    #     Activation('softmax'),
+    #     Dense(64),
+    #     Activation('softmax'),
+    #     Dense(128),
+    #     Activation('relu'),
+    #     Dense(1),
+    #     Activation('sigmoid'),
+    # ])
 
+    nGPU = 8
+    BATCH = 256 * nGPU
     # model = multi_gpu_model(model, gpus=nGPU)
     model.compile(
         loss='mean_squared_error',
@@ -72,7 +99,7 @@ for train_index, test_index in group_kfold.split(X, Y, group):
 
     tbCallBack = TensorBoard(log_dir='./logs',  # log 目录
                              histogram_freq=0,  # 按照何等频率（epoch）来计算直方图，0为不计算
-                             batch_size=32 * nGPU, # 用多大量的数据计算直方图
+                             batch_size=BATCH, # 用多大量的数据计算直方图
                              write_graph=True,  # 是否存储网络结构图
                              write_grads=True,  # 是否可视化梯度直方图
                              write_images=True,  # 是否可视化参数
@@ -84,11 +111,11 @@ for train_index, test_index in group_kfold.split(X, Y, group):
         x=X_train,
         y=Y_train,
         epochs=2000,
-        batch_size=32 * nGPU,
+        batch_size=BATCH,
         validation_data=(X_test, Y_test),
         callbacks=[tbCallBack]
     )
-    print(model.evaluate(X_test, Y_test, batch_size=32 * nGPU))
+    print(model.evaluate(X_test, Y_test, batch_size=BATCH))
     exit()
 
     # clf.fit(X_train, Y_train)
