@@ -38,25 +38,21 @@ scores = []
 for train_index, test_index in group_kfold.split(X, Y, group):
     X_train, X_test = X[train_index], X[test_index]
     Y_train, Y_test = Y[train_index], Y[test_index]
-    print(len(X_train))
-    print(len(X_test))
-    print(X_train.shape)
-    print(Y_train.shape)
-    # this is the size of our encoded representations
-    encoding_dim = 32  # 32 floats -> compression of factor 24.5, assuming the input is 784 floats
-
-    # this is our input placeholder
 
     model = Sequential([
-        Dense(32, input_dim=107),
+        Dense(128, input_dim=107),
+        Activation('relu'),
+        Dense(64),
+        Activation('softmax'),
+        Dense(48),
         Activation('relu'),
         Dense(32),
         Activation('softmax'),
-        Dense(32),
+        Dense(48),
         Activation('relu'),
-        Dense(32),
+        Dense(64),
         Activation('softmax'),
-        Dense(32),
+        Dense(128),
         Activation('relu'),
         Dense(1),
         Activation('sigmoid'),
