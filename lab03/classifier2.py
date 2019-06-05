@@ -59,20 +59,20 @@ for train_index, test_index in group_kfold.split(X, Y, group):
     # ])
 
     model = Sequential([
-        Dense(256, input_dim=107),
+        Dense(128, input_dim=107),
         Activation('relu'),
-        Dense(128),
+        Dense(96),
         Activation('softmax'),
         Dense(64),
         Activation('relu'),
         Dense(48),
-        Activation('relu'),
+        Activation('softmax'),
         Dense(32),
         Activation('relu'),
         Dense(16),
-        Activation('relu'),
-        Dense(1),
         Activation('softmax'),
+        Dense(1),
+        Activation('relu'),
     ])
 
     nGPU = 8
