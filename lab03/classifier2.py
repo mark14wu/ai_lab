@@ -16,6 +16,8 @@ from keras.layers import Dense, Activation
 
 from keras.callbacks import TensorBoard
 
+from keras.utils import multi_gpu_model
+
 folds = 5
 # clf = SVC(kernel="linear", C=0.25, class_weight={0: 1, 1: 1, 2: 10})
 # clf = GradientBoostingClassifier()
@@ -52,13 +54,25 @@ for train_index, test_index in group_kfold.split(X, Y, group):
         Activation('softmax'),
         Dense(32),
         Activation('relu'),
+        Dense(32),
+        Activation('softmax'),
+        Dense(32),
+        Activation('relu'),
         Dense(1),
         Activation('sigmoid'),
     ])
 
-    model.compile(optimizer='adadelta',
-                  loss='mean_squared_error',
-                  metrics=['accuracy'])
+    nGPU = 5
+
+    model = multi_gpu_model(model, gpus=nGPU)
+    model.compile(
+        loss='categorical_crossentropy',
+        optimizer='rmsprop',
+        metrics=['accuracy'])
+
+    # model.compile(optimizer='adadelta',
+    #               loss='mean_squared_error',
+    #               metrics=['accuracy'])
 
     tbCallBack = TensorBoard(log_dir='./logs',  # log 目录
                              histogram_freq=0,  # 按照何等频率（epoch）来计算直方图，0为不计算
@@ -74,7 +88,7 @@ for train_index, test_index in group_kfold.split(X, Y, group):
         x=X_train,
         y=Y_train,
         epochs=2000,
-        batch_size=128,
+        batch_size=32 * nGPU,
         validation_split=0.1,
         shuffle=True,
         callbacks=[tbCallBack]
