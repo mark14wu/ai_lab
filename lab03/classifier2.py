@@ -61,7 +61,11 @@ for train_index, test_index in group_kfold.split(X, Y, group):
     model = Sequential([
         Dense(128, input_dim=107),
         Activation('relu'),
+        Dense(112),
+        Activation('softmax'),
         Dense(96),
+        Activation('relu'),
+        Dense(80),
         Activation('softmax'),
         Dense(64),
         Activation('relu'),
@@ -76,7 +80,7 @@ for train_index, test_index in group_kfold.split(X, Y, group):
     ])
 
     nGPU = 8
-    BATCH = 32 * nGPU
+    BATCH = 4 * nGPU
     # model = multi_gpu_model(model, gpus=nGPU)
     model.compile(
         loss='mean_squared_error',
