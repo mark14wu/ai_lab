@@ -62,11 +62,11 @@ for train_index, test_index in group_kfold.split(X, Y, group):
         Activation('sigmoid'),
     ])
 
-    nGPU = 5
+    nGPU = 8
 
-    model = multi_gpu_model(model, gpus=nGPU)
+    # model = multi_gpu_model(model, gpus=nGPU)
     model.compile(
-        loss='categorical_crossentropy',
+        loss='mean_squared_error',
         optimizer='rmsprop',
         metrics=['accuracy'])
 
@@ -76,7 +76,7 @@ for train_index, test_index in group_kfold.split(X, Y, group):
 
     tbCallBack = TensorBoard(log_dir='./logs',  # log 目录
                              histogram_freq=0,  # 按照何等频率（epoch）来计算直方图，0为不计算
-                             #                  batch_size=32,     # 用多大量的数据计算直方图
+                             batch_size=32 * nGPU # 用多大量的数据计算直方图
                              write_graph=True,  # 是否存储网络结构图
                              write_grads=True,  # 是否可视化梯度直方图
                              write_images=True,  # 是否可视化参数
@@ -89,11 +89,10 @@ for train_index, test_index in group_kfold.split(X, Y, group):
         y=Y_train,
         epochs=2000,
         batch_size=32 * nGPU,
-        validation_split=0.1,
-        shuffle=True,
+        validation_data=(X_test, Y_test),
         callbacks=[tbCallBack]
     )
-    print(model.evaluate(X_test, Y_test, batch_size=256))
+    print(model.evaluate(X_test, Y_test, batch_size=32 * nGPU))
     exit()
 
     # clf.fit(X_train, Y_train)
