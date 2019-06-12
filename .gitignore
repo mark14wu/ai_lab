@@ -125,3 +125,13 @@ lab03/tap_fun_train.csv
 lab03/data/tap_fun_test.csv
 lab03/new_train2.csv
 lab03/model_plot.png
+lab02/data/DEAP/.EEG_feature.txt.icloud
+lab01/24数码/.vscode/ipch/58af659946a3d3/.Cannon.ipch.icloud
+lab02/data/backup/svm_deap
+lab02/data/backup/svm_mahnob_hci
+lab02/data/preprocessed/bernoulliNB_deap_hci
+lab02/data/preprocessed/bernoulliNB_mahnob_hci
+lab02/data/preprocessed/svm_deap
+lab02/data/preprocessed/svm_mahnob_hci
+lab02/data/preprocessed/backup/bernoulliNB_deap_hci
+lab02/data/preprocessed/backup/bernoullinb_mahnob_hci
