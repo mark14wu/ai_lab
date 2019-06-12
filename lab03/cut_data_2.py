@@ -28,6 +28,6 @@ print(len(temp2))
 
 temp4 = pd.concat([temp1, temp2], axis=0)
 print(len(temp4))
-temp4 = temp4.drop(['prediction_pay_price', 'pay_more_price'], axis=1)
+temp4 = temp4.drop(['prediction_pay_price', 'pay_price'], axis=1)
 temp4.to_csv('new_train2.csv')
 # 其实以上部分只要一个map就好了
